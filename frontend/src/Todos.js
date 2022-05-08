@@ -10,7 +10,6 @@ import {
   TextField,
   Checkbox,
 } from "@material-ui/core";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const useStyles = makeStyles({
   addTodoContainer: { padding: 10 },
@@ -41,15 +40,6 @@ function Todos() {
   const classes = useStyles();
   const [todos, setTodos] = useState([]);
   const [newTodoText, setNewTodoText] = useState("");
-
-  function handleOnDragEnd(result) {
-    if (!result.destination) return;
-    const items = Array.from(todos);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    setTodos(items);
-  }
 
   useEffect(() => {
     fetch("http://localhost:3001/")
@@ -128,58 +118,37 @@ function Todos() {
       </Paper>
       {todos.length > 0 && (
         <Paper className={classes.todosContainer}>
-          <DragDropContext onDragEnd={handleOnDragEnd}>
-            <Droppable droppableId="tasks">
-              {(provided) => (
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="stretch"
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {todos.map(({ id, text, completed }, index) => (
-                    <Draggable key={id} draggableId={id} index={index}>
-                      {(provided) => (
-                        <Box
-                          display="flex"
-                          flexDirection="row"
-                          alignItems="center"
-                          className={classes.todoContainer}
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <Checkbox
-                            checked={completed}
-                            onChange={() => toggleTodoCompleted(id)}
-                          ></Checkbox>
-                          <Box flexGrow={1}>
-                            <Typography
-                              className={
-                                completed ? classes.todoTextCompleted : ""
-                              }
-                              variant="body1"
-                            >
-                              {text}
-                            </Typography>
-                          </Box>
-                          <Button
-                            className={classes.deleteTodo}
-                            startIcon={<Icon>delete</Icon>}
-                            onClick={() => deleteTodo(id)}
-                          >
-                            Delete
-                          </Button>
-                        </Box>
-                      )}
-                    </Draggable>
-                  ))}
+          <Box display="flex" flexDirection="column" alignItems="stretch">
+            {todos.map(({ id, text, completed }) => (
+              <Box
+                key={id}
+                display="flex"
+                flexDirection="row"
+                alignItems="center"
+                className={classes.todoContainer}
+              >
+                <Checkbox
+                  checked={completed}
+                  onChange={() => toggleTodoCompleted(id)}
+                ></Checkbox>
+                <Box flexGrow={1}>
+                  <Typography
+                    className={completed ? classes.todoTextCompleted : ""}
+                    variant="body1"
+                  >
+                    {text}
+                  </Typography>
                 </Box>
-              )}
-              {provided.placeholder}
-            </Droppable>
-          </DragDropContext>
+                <Button
+                  className={classes.deleteTodo}
+                  startIcon={<Icon>delete</Icon>}
+                  onClick={() => deleteTodo(id)}
+                >
+                  Delete
+                </Button>
+              </Box>
+            ))}
+          </Box>
         </Paper>
       )}
     </Container>
